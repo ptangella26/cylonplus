@@ -4,11 +4,16 @@ High-Performance Distributed Data frames for Machine Learning/Deep Learning Mode
 
 ## Installation instructions
 ```
-module load gcc-12.1.0  python-3.8.3  nccl-11.8 openmpi-4.1.4  cuda-toolkit-12.2.0 cudnn-8.9.5_cuda12.x
-python -m venv $HOME/Project/arupcsedu/dnn-env
-source $HOME/Project/arupcsedu/dnn-env/bin/activate
+module load gcc-12.1.0  anaconda3
 
-pip install pip -U
-pip install torch torchvision
+conda env create -f conda/gcylon.yml
+conda activate gcylon_dev
+
+export PATH=/u/djy8hg/anaconda3/envs/gcylon_dev/bin:$PATH LD_LIBRARY_PATH=/u/djy8hg/anaconda3/envs/gcylon_dev/lib:$LD_LIBRARY_PATH PYTHONPATH=/u/djy8hg/anaconda3/envs/gcylon_dev/lib/python3.8/site-packages
+
+conda install pytorch torchvision torchtext torchaudio -c pytorch
+
+cd src/model
+python cnn.py
 
 ```
