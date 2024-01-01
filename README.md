@@ -15,6 +15,6 @@ conda activate cyp-venv
 conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
 
 cd src/model
-python cnn.py
+python multi-gpu-cnn.py
 
 ```
