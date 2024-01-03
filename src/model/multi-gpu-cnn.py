@@ -1,3 +1,5 @@
+#Arup Sarker: DDP implement with multiprocess by using spawn on CNN
+#Command: python multi-gpu-cnn.py
 from __future__ import print_function
 import argparse
 import torch
@@ -5,22 +7,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torch.optim.lr_scheduler import StepLR
 
 import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
+#from PyTorchLoader import IterableParquetDataset, IterableManualParquetDataset
 import os
+from examples.mnist import DEFAULT_MNIST_DATA_PATH
+from petastorm import make_reader, TransformSpec
+from petastorm import make_batch_reader
+#from PetastormDataLoader import TransformersDataLoader
+from petastorm.pytorch import DataLoader
 
 
 def ddp_setup(rank, world_size):
-    """
-    Args:
-        rank: Unique identifier of each process
-        world_size: Total number of processes
-    """
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "12355"
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
@@ -55,7 +58,6 @@ class Net(nn.Module):
 
 def train(args, model, rank, train_loader, optimizer, epoch):
     model.train()
-    #print(f"[GPU{device}] Epoch {epoch} | Batchsize: {args.batch_size} | Steps: {len(train_loader)}")
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(rank), target.to(rank)
         optimizer.zero_grad()
@@ -78,6 +80,7 @@ def test(model, rank, test_loader):
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(rank), target.to(rank)
+            #data, target = data['image'].to(device), data['digit'].to(device)  # For fixing build 
             output = model(data)
             test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
@@ -116,9 +119,32 @@ def prepare_dataloader(dataset: Dataset, batch_size: int):
         sampler=DistributedSampler(dataset)
     )
 
+def _transform_row(mnist_row):
+    # For this example, the images are stored as simpler ndarray (28,28), but the
+    # training network expects 3-dim images, hence the additional lambda transform.
+    transform = transforms.Compose([
+        transforms.Lambda(lambda nd: nd.reshape(28, 28, 1)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    # In addition, the petastorm pytorch DataLoader does not distinguish the notion of
+    # data or target transform, but that actually gives the user more flexibility
+    # to make the desired partial transform, as shown here.
+    result_row = {
+        'image': transform(mnist_row['image']),
+        'digit': mnist_row['digit']
+    }
+
+    return result_row
+
+
 if __name__ == '__main__':
      # Training settings
+    DEFAULT_MNIST_DATA_PATH = '/tmp/mnist'
+
+    default_dataset_url = 'file://{}'.format(DEFAULT_MNIST_DATA_PATH)
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser.add_argument('--dataset-url', type=str, default=default_dataset_url, metavar='S', help='hdfs:// or file:/// URL to the MNIST petastorm dataset (default: %s)' % default_dataset_url)
     parser.add_argument('--batch-size', type=int, default=16, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=16, metavar='N',
@@ -158,6 +184,32 @@ if __name__ == '__main__':
     world_size = torch.cuda.device_count()
     print(f"World Size:  {world_size}")
 
+
+
+    #dataset1 = datasets.MNIST('../data', train=True, download=True, transform=transform)
+    #dataset2 = datasets.MNIST('../data', train=False, transform=transform)
+    
+    """
+    transform = TransformSpec(_transform_row, removed_fields=['idx'])
+    train_loader = DataLoader(make_reader('{}/train'.format(args.dataset_url), 
+                                    num_epochs=args.epochs, 
+                                    transform_spec=transform, seed=args.seed, shuffle_rows=True),
+                                    batch_size=args.batch_size)
+    test_loader = DataLoader(make_reader('{}/test'.format(args.dataset_url),
+                                    num_epochs=args.epochs,
+                                    transform_spec=transform), 
+                                    batch_size=args.batch_size)
+    """
+  
+    
+   
+    
+    #dataset1 = IterableParquetDataset('{}/train'.format(args.dataset_url), process_rows)
+    #dataset2 = IterableParquetDataset('{}/test'.format(args.dataset_url),  process_rows)
+
+    #dataloader = DataLoader(dataset, num_workers=4)
+
+
     train_kwargs = {'batch_size': args.batch_size}
     test_kwargs = {'batch_size': args.test_batch_size}
     transform=transforms.Compose([
@@ -168,6 +220,7 @@ if __name__ == '__main__':
                        transform=transform)
     dataset2 = datasets.MNIST('../data', train=False,
                        transform=transform)
+    
     if use_cuda:
         train_cuda_kwargs = {'num_workers': world_size,
                        'pin_memory': True,
