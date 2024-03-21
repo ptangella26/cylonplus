@@ -18,6 +18,8 @@ DIR=/u/djy8hg/anaconda3/envs/cyp-venv
 export CUDA_HOME=$DIR/bin
 export PATH=$DIR/bin:$PATH LD_LIBRARY_PATH=$DIR/lib:$LD_LIBRARY_PATH PYTHONPATH=$DIR/lib/python3.11/site-packages 
 
+pip install petastorm
+
 cd src/model
 python multi-gpu-cnn.py
 
