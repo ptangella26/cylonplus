@@ -55,29 +55,30 @@ def prepare_dataloader(x, y, batch_size):
     dataset = TensorDataset(tensor_x, tensor_y)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-# def plot_predictions(model, test_data_loader, scaler, device):
-#     model.eval() 
-#     actual_prices = []
-#     predicted_prices = []
+def plot_predictions(model, test_data_loader, scaler, device):
+    model.eval() 
+    actual_prices = []
+    predicted_prices = []
     
-#     with torch.no_grad():
-#         for data, targets in test_data_loader:
-#             data, targets = data.to(device), targets.to(device)
-#             predictions = model(data)
-#             actual_prices.extend(scaler.inverse_transform(targets.cpu().numpy()))
-#             predicted_prices.extend(scaler.inverse_transform(predictions.cpu().numpy()))
+    with torch.no_grad():
+     for data, targets in test_data_loader:
+         data, targets = data.to(device), targets.to(device)
+         predictions = model(data)
+         actual_prices.extend(scaler.inverse_transform(targets.cpu().numpy()))
+         predicted_prices.extend(scaler.inverse_transform(predictions.cpu().numpy()))
     
-#     actual_prices = np.array(actual_prices)
-#     predicted_prices = np.array(predicted_prices)
-#     plt.figure(figsize=(20,10))
-#     plt.plot(actual_prices, label='Actual Prices', color='blue')
-#     plt.plot(predicted_prices, label='Predicted Prices', color='red')
-#     plt.title('Actual vs Predicted Stock Prices')
-#     plt.xlabel('Time')
-#     plt.ylabel('Prices')
-#     plt.legend()
-#     plt.show()
-#     plt.savefig('prediction_vs_actual.png')
+    actual_prices = np.array(actual_prices)
+    predicted_prices = np.array(predicted_prices)
+    
+    plt.figure(figsize=(20,10))
+    plt.plot(actual_prices, label='Actual Prices', color='blue')
+    plt.plot(predicted_prices, label='Predicted Prices', color='red')
+    plt.title('Actual vs Predicted Stock Prices')
+    plt.xlabel('Time')
+    plt.ylabel('Prices')
+    plt.legend()
+    plt.show()
+    plt.savefig('prediction_vs_actual.png')
 
 def main(args):
     (x_train, y_train), (x_test, y_test), _ = load_data("rnn/data/nasdaq_data.csv", args.sequence_length)
@@ -106,7 +107,8 @@ def main(args):
 
         print(f'Epoch {epoch} Average Loss: {total_loss / len(train_data_loader):.6f}')
     (x_test, y_test), _, scaler = load_data("rnn/data/nasdaq_data.csv", args.sequence_length)
-    # plot_predictions(model, test_data_loader, scaler, device)
+    test_data_loader = prepare_dataloader(x_test, y_test, args.batch_size)
+    plot_predictions(model, test_data_loader, scaler, device)
 
 
 
