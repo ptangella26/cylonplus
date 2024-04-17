@@ -1,4 +1,7 @@
-# Command: torchrun --standalone --nproc_per_node=4  lstm-multi-gpu-torchrun.py --epochs 3 
+#install,
+# conda install matplotlib
+# conda install scikit-learn
+# Command: torchrun --standalone --nproc_per_node=1  lstm-multi-gpu-torchrun.py --epochs 3 
 
 import torch
 import torch.nn as nn
@@ -77,13 +80,10 @@ def prepare_dataloader(x, y, batch_size):
 #     plt.savefig('prediction_vs_actual.png')
 
 def main(args):
-    (x_train, y_train), (x_test, y_test), _ = load_data(args.data_path, args.sequence_length)
+    (x_train, y_train), (x_test, y_test), _ = load_data("rnn/data/nasdaq_data.csv", args.sequence_length)
     train_data_loader = prepare_dataloader(x_train, y_train, args.batch_size)
     
-    if use_cuda:
-        device = torch.device("cuda")
-    else:
-        device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     model = LSTMNet(input_dim=1, hidden_dim=args.hidden_dim, output_dim=1, num_layers=args.num_layers).to(device)
     criterion = torch.nn.MSELoss()
@@ -105,7 +105,7 @@ def main(args):
                 print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_data_loader.dataset)} ({100. * batch_idx / len(train_data_loader):.0f}%)] \tLoss: {loss.item():.6f}')
 
         print(f'Epoch {epoch} Average Loss: {total_loss / len(train_data_loader):.6f}')
-    (x_test, y_test), _, scaler = load_data(args.data_path, args.sequence_length)
+    (x_test, y_test), _, scaler = load_data("rnn/data/nasdaq_data.csv", args.sequence_length)
     # plot_predictions(model, test_data_loader, scaler, device)
 
 
