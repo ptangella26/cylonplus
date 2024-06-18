@@ -1,4 +1,5 @@
 # Libcudf Examples
+### Author: Arup Sarker (arupcsedu@gmail.com; djy8hg@virginia.edu)
 
 This folder contains examples to demonstrate libcudf use cases. Running `build.sh` builds all
 libcudf examples.
