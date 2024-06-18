@@ -17,14 +17,15 @@ git clone https://github.com/arupcsedu/cylonplus.git
 cd cylonplus
 module load anaconda3
 
-conda create -n cyp-venv python=3.11
+conda create -n cyp-venv python=3.9
 conda activate cyp-venv
 
 conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
 DIR=/u/$USER/anaconda3/envs/cyp-venv 
 
+
 export CUDA_HOME=$DIR/bin
-export PATH=$DIR/bin:$PATH LD_LIBRARY_PATH=$DIR/lib:$LD_LIBRARY_PATH PYTHONPATH=$DIR/lib/python3.11/site-packages 
+export PATH=$DIR/bin:$PATH LD_LIBRARY_PATH=$DIR/lib:$LD_LIBRARY_PATH PYTHONPATH=$DIR/lib/python3.9/site-packages 
 
 pip install petastorm
 

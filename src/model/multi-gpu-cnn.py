@@ -22,13 +22,14 @@ from petastorm import make_reader, TransformSpec
 from petastorm import make_batch_reader
 #from PetastormDataLoader import TransformersDataLoader
 from petastorm.pytorch import DataLoader
+import torch.distributed as dist
 
 
 def ddp_setup(rank, world_size):
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "12355"
-    init_process_group(backend="nccl", rank=rank, world_size=world_size)
-    torch.cuda.set_device(rank)
+    init_process_group(backend="gloo", rank=rank, world_size=world_size)
+    torch.cpu.set_device(rank)
 
 
 class Net(nn.Module):
@@ -183,7 +184,11 @@ if __name__ == '__main__':
     else:
         device = torch.device("cpu")
     
-    world_size = torch.cuda.device_count()
+    #world_size = torch.cuda.device_count()
+    dist.init_process_group("gloo")
+
+    rank = dist.get_rank()
+    world_size = dist.get_world_size()
     print(f"World Size:  {world_size}")
     StopWatch.stop("initialize")
 
@@ -224,16 +229,16 @@ if __name__ == '__main__':
     dataset2 = datasets.MNIST('../data', train=False,
                        transform=transform)
     
-    if use_cuda:
-        train_cuda_kwargs = {'num_workers': world_size,
-                       'pin_memory': True,
-                       'shuffle': True}
-        test_cuda_kwargs = {'num_workers': world_size,
-                       'pin_memory': True,
-                       'shuffle': True}
+    #if use_cuda:
+    train_cuda_kwargs = {'num_workers': world_size,
+                    'pin_memory': True,
+                    'shuffle': True}
+    test_cuda_kwargs = {'num_workers': world_size,
+                    'pin_memory': True,
+                    'shuffle': True}
 
-        train_kwargs.update(train_cuda_kwargs)
-        test_kwargs.update(test_cuda_kwargs)
+    train_kwargs.update(train_cuda_kwargs)
+    test_kwargs.update(test_cuda_kwargs)
     
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
