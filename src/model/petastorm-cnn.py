@@ -98,7 +98,7 @@ def _transform_row(mnist_row):
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='Petastorm MNIST Example')
-    DEFAULT_MNIST_DATA_PATH = '/tmp/mnist'
+    DEFAULT_MNIST_DATA_PATH = '/project/bii_dsc_community/djy8hg/arupcsedu/cylonplus/src/model/mnist'
 
     default_dataset_url = 'file://{}'.format(DEFAULT_MNIST_DATA_PATH)
     parser.add_argument('--dataset-url', type=str, default=default_dataset_url, metavar='S', help='hdfs:// or file:/// URL to the MNIST petastorm dataset (default: %s)' % default_dataset_url)

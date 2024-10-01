@@ -183,10 +183,10 @@
         "schema": "ssh",
         "cores": 8
     },
-    "uva.rivanna": {
-        "project": null,
-        "queue": "bii_dsc_community",
-        "schema": "interactive",
-        "cores": 8
+    "uva.rivanna"  : {
+        "project"  : null,
+        "queue"    : "gpu",
+        "schema"   : "interactive",
+        "cores"    : 8
     }
 }

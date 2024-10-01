@@ -31,6 +31,7 @@ import sys
 
 import radical.utils as ru
 import radical.pilot as rp
+import pandas as pd
 import argparse
 import torch
 import torch.nn as nn
@@ -53,7 +54,6 @@ RANKS  = 2
 
 # ------------------------------------------------------------------------------
 #
-@rp.pythontask
 
 class Net(nn.Module):
     def __init__(self):
@@ -80,7 +80,7 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-
+@rp.pythontask
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -190,8 +190,6 @@ def cnn_config():
 
     if args.save_model:
         torch.save(model.state_dict(), "$PWD/mnist_cnn.pt")
-
-
 
 
 # ------------------------------------------------------------------------------

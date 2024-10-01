@@ -176,3 +176,4 @@ if __name__ == '__main__':
     world_size = ctx.get_world_size()
     demo_basic(rank=rank, world_size=world_size)
     ctx.finalize()
+    
