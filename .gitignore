@@ -162,3 +162,9 @@ cython_debug/
 
 lightning_logs/
 saved_models/
+saved_models_raptor/
+plots_raptor/
+plots_non_raptor/
+rp.session.*/
+*.err
+*.out

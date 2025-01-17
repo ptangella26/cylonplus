@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
-
-import radical.pilot as rp
 from neuralforecast import NeuralForecast
-# ------------------------------------------------------------------------------
-#
-def task_state_cb(task, state):
-    pass
-# ------------------------------------------------------------------------------
-#
-@rp.pythontask
-def hello_world(msg, sleep):
-    import time
-    print('hello %s: %.3f' % (msg, time.time()))
-    time.sleep(sleep)
-    print('hello %s: %.3f' % (msg, time.time()))
-    return 'hello %s' % msg
 
-# ------------------------------------------------------------------------------
-#
-@rp.pythontask
 def train_nbeats():
     import time
     from neuralforecast import NeuralForecast
@@ -67,7 +49,7 @@ def train_nbeats():
         print(f"Error during NBEATS model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
+
 def train_deepar():
     import time
     from neuralforecast import NeuralForecast
@@ -123,7 +105,6 @@ def train_deepar():
         print(f"Error during DeepAR model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_lstm():
     import time
     from neuralforecast import NeuralForecast
@@ -171,7 +152,6 @@ def train_lstm():
         print(f"Error during LSTM model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_nhits():
     import time
     from neuralforecast import NeuralForecast
@@ -222,7 +202,6 @@ def train_nhits():
         print(f"Error during NHITS model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_itransformer():
     import time
     from neuralforecast import NeuralForecast
@@ -273,7 +252,6 @@ def train_itransformer():
         print(f"Error during iTransformer model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_gru():
     import time
     from neuralforecast import NeuralForecast
@@ -324,7 +302,6 @@ def train_gru():
         return str(e)
 
 
-@rp.pythontask
 def train_tcn():
     import time
     from neuralforecast import NeuralForecast
@@ -373,7 +350,6 @@ def train_tcn():
         print(f"Error during TCN model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_autoformer():
     import time
     from neuralforecast import NeuralForecast
@@ -422,7 +398,6 @@ def train_autoformer():
         print(f"Error during Autoformer model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_fedformer():
     import time
     from neuralforecast import NeuralForecast
@@ -473,7 +448,6 @@ def train_fedformer():
         print(f"Error during FEDformer model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_timesnet():
     import time
     from neuralforecast import NeuralForecast
@@ -524,7 +498,6 @@ def train_timesnet():
         print(f"Error during TimesNet model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_vanillatransformer():
     import time
     from neuralforecast import NeuralForecast
@@ -575,7 +548,6 @@ def train_vanillatransformer():
         print(f"Error during VanillaTransformer model training: {str(e)}")
         return str(e)
 
-@rp.pythontask
 def train_patchtst():
     import time
     from neuralforecast import NeuralForecast
@@ -629,125 +601,15 @@ def train_patchtst():
 # ------------------------------------------------------------------------------
 #
 if __name__ == '__main__':
-
-    session = rp.Session()
-    try:
-        pd_init = {
-            'access_schema' : 'interactive',
-            'cores'         : 128,
-            'resource'      : 'uva.rivanna',
-            'runtime'       : 15
-        }
-        pd = rp.PilotDescription(pd_init)
-
-        pmgr = rp.PilotManager(session=session)
-        tmgr = rp.TaskManager(session=session)
-        tmgr.register_callback(task_state_cb)
-
-        pilot = pmgr.submit_pilots([pd])[0]
-        tmgr.add_pilots(pilot)
-
-        raptor = pilot.submit_raptors(rp.TaskDescription({'mode': rp.RAPTOR_MASTER}))[0]
-        worker = raptor.submit_workers(
-            [rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8}),
-             rp.TaskDescription({'mode': rp.RAPTOR_WORKER, 'ranks': 8})])
-
-
-        td_func_0 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_nbeats()})
-        
-        td_fund_1 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_deepar()})
-
-        td_func_2 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_lstm})
-        
-        td_func_3 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_nhits()})
-
-        td_func_4 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_itransformer()})
-
-        td_func_5 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_gru()})
-        
-        td_func_6 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_tcn()})
-        
-        td_func_7 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_autoformer()})
-
-        td_func_8 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_fedformer()})
-
-        td_func_9 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_timesnet()})
-
-        td_func_10 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_vanillatransformer()})
-        
-        td_func_11 = rp.TaskDescription({'mode': rp.TASK_FUNCTION,
-                                        'function': train_patchtst()})
-
-        model_training_functions = [
-            train_nbeats,
-            train_deepar,
-            train_lstm,
-            train_nhits,
-            train_itransformer,
-            train_gru,
-            train_tcn,
-            train_autoformer,
-            train_fedformer,
-            train_timesnet,
-            train_vanillatransformer,
-            train_patchtst
-        ]
-        
-        task_descriptions = [
-            rp.TaskDescription({
-                'mode': rp.TASK_FUNCTION,
-                'function': func
-            })
-            for func in model_training_functions
-        ]
-        
-
-        tasks = raptor.submit_tasks([td_func_0, 
-                                     td_fund_1, 
-                                     td_func_2, 
-                                     td_func_3,
-                                     td_func_4, 
-                                     td_func_5, 
-                                     td_func_6, 
-                                     td_func_7,
-                                     td_func_8, 
-                                     td_func_9, 
-                                     td_func_10, 
-                                     td_func_11])
-        
-        #tasks = raptor.submit_tasks([td_func_0])
-
-        tmgr.wait_tasks([task.uid for task in tasks])
-
-        for task in tasks:
-            print('%s [%s]:\n%s \n%s' % (task.uid, task.state, task.stdout, task.stderr))
-
-        raptor.rpc('stop')
-        tmgr.wait_tasks(raptor.uid)
-        print('%s [%s]: %s' % (raptor.uid, raptor.state, raptor.stdout))
-
-    finally:
-        session.close(download=False)
-
-# ------------------------------------------------------------------------------
+    train_nbeats()
+    train_deepar()
+    train_lstm()
+    train_nhits()
+    train_itransformer()
+    train_gru()
+    train_tcn()
+    train_autoformer()
+    train_fedformer()
+    train_timesnet()
+    train_vanillatransformer()
+    train_patchtst()

@@ -2,10 +2,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
 #SBATCH --time=0:10:00
-#SBATCH --partition=bii
+#SBATCH --partition=bii-gpu
 #SBATCH -A bii_dsc_community
 #SBATCH --output=rp-%x-%j.out
 #SBATCH --error=rp-%x-%j.err
+#SBATCH --gres=gpu:1
 
 
 ENV_PATH=/scratch/nww7sm/workdir/rp_dl

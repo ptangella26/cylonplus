@@ -11,7 +11,7 @@
 
 
 ENV_PATH=/scratch/nww7sm/workdir/rp_dl
-SCRIPT_PATH=/scratch/nww7sm/workdir/cylonplus/src/radical-dl/neural-forecast/raptor_simple.py
+SCRIPT_PATH=/scratch/nww7sm/workdir/cylonplus/src/radical-dl/neural-forecast/non_raptor_simple.py
 #SCRIPT_PATH=/project/bii_dsc_community/djy8hg/arupcsedu/cylonplus/src/radical-dl/hydrology/neural-forecast/raptor-neural-forecast.py
 
 module load gcc
